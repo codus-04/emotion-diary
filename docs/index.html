@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 감정 일기 앱 — Week 11 발표</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --dk:#2E5233;--dkM:#3A6840;--dkS:#4A7A50;
+  --lm:#6BAE72;--lmM:#8DC494;--lmL:#AACFAF;
+  --lmBg:#F0F8F1;--lmBg2:#DDF0E1;--lmBg3:#C5E5CA;
+  --teal:#6DC4BC;--tealBg:#E0F4F2;
+  --lav:#A99DD6;--lavBg:#EEEBF8;
+  --peach:#E0A090;--peachBg:#FCF0EC;
+  --gold:#C9A85A;--goldBg:#F5EEDB;
+  --blu:#7AAFD6;--bluBg:#E4F0FA;
+  --txt:#1C3A20;--txt2:#4A6B50;--txt3:#6B8F70;
+  --bdr:#BDD4C0;--wht:#FFFFFF;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:#1A2E1C;
+  font-family:'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif}
+
+/* ── 슬라이드 기본 ─────────────────────────────── */
+.pres{position:relative;width:100vw;height:100vh;overflow:hidden}
+.slide{position:absolute;inset:0;display:none;overflow:hidden}
+.slide.active{display:flex;flex-direction:row}
+.slide.col{flex-direction:column!important}
+
+/* ── 고정 UI ────────────────────────────────────── */
+.nav{position:fixed;bottom:18px;right:18px;z-index:300;display:flex;gap:8px;align-items:center}
+.nav-btn{background:rgba(58,104,64,.9);color:#fff;border:none;padding:7px 18px;border-radius:6px;
+  cursor:pointer;font-size:14px;font-family:inherit}
+.nav-btn:hover{background:var(--lm)}
+.counter{color:rgba(255,255,255,.7);font-size:13px;padding:7px 12px;
+  background:rgba(0,0,0,.3);border-radius:6px}
+.timer{position:fixed;top:14px;right:14px;z-index:300;background:rgba(58,104,64,.92);
+  color:#fff;padding:7px 16px;border-radius:8px;font-size:21px;font-weight:700;
+  cursor:pointer;font-variant-numeric:tabular-nums;letter-spacing:.5px;user-select:none}
+.timer.warn{background:rgba(201,168,90,.92)}
+.timer.danger{background:rgba(224,160,144,.92)}
+.keys{position:fixed;bottom:62px;left:14px;color:rgba(255,255,255,.38);font-size:11px;z-index:300}
+.notes{position:fixed;bottom:52px;left:0;right:0;background:rgba(26,46,28,.96);
+  color:var(--lmL);padding:14px 24px;font-size:13px;line-height:1.7;
+  display:none;border-top:2px solid var(--lm);z-index:200}
+.notes.on{display:block}
+.notes strong{color:var(--lmM)}
+
+/* ══════════════════════════════════════════════════
+   SLIDE 1 — COVER
+══════════════════════════════════════════════════ */
+.s1{background:var(--dk)}
+.s1 .blob{position:absolute;border-radius:50%;pointer-events:none}
+.s1 .lbar{position:absolute;left:0;top:0;width:5px;height:100%;background:var(--lmM)}
+.s1 .body{position:relative;z-index:2;padding:0 7%;display:flex;flex-direction:column;
+  justify-content:center;height:100%}
+.s1 .pre{color:var(--lmM);font-size:clamp(.9rem,1.2vw,1.1rem);margin-bottom:.4rem}
+.s1 .title{color:#fff;font-size:clamp(2.4rem,5.5vw,4.2rem);font-weight:700;
+  line-height:1.15;margin-bottom:1rem}
+.s1 .tagline{color:var(--lmL);font-size:clamp(.9rem,1.3vw,1.15rem);
+  font-style:italic;margin-bottom:.9rem}
+.s1 .div{width:200px;height:3px;background:var(--lmM);border-radius:2px;margin-bottom:.9rem}
+.s1 .sub{color:#7AAE80;font-size:clamp(.8rem,1vw,1rem);margin-bottom:1.4rem}
+.s1 .tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.6rem}
+.s1 .tag{padding:4px 14px;border-radius:20px;font-size:.78rem;color:#fff;
+  border:1px solid rgba(255,255,255,.3)}
+.s1 .meta{color:#5A7A5A;font-size:.78rem}
+
+/* ══════════════════════════════════════════════════
+   SLIDE 2 — VISION & PROBLEM
+══════════════════════════════════════════════════ */
+.s2 .left{width:42%;background:var(--lmBg2);position:relative;
+  padding:5% 5%;overflow:hidden;border-top:5px solid var(--lm)}
+.s2 .lb1{position:absolute;width:150%;aspect-ratio:1;border-radius:50%;
+  background:var(--lmBg3);top:-40%;left:-40%;opacity:.25}
+.s2 .lb2{position:absolute;width:120%;aspect-ratio:1;border-radius:50%;
+  background:var(--lmBg3);bottom:-35%;right:-30%;opacity:.2}
+.s2 .lc{position:relative;z-index:2;height:100%;display:flex;
+  flex-direction:column;justify-content:center}
+.s2 .vlabel{color:var(--lm);font-size:.72rem;font-weight:700;
+  letter-spacing:4px;margin-bottom:.3rem}
+.s2 .quote{color:var(--lmM);font-size:clamp(4rem,6vw,5.5rem);
+  font-family:Georgia,serif;line-height:.8;margin-bottom:.3rem}
+.s2 .vtext{color:var(--txt);font-size:clamp(1.1rem,1.7vw,1.45rem);
+  line-height:1.55;margin-bottom:1.1rem}
+.s2 .vtext em{color:var(--lm);font-weight:700;font-style:normal}
+.s2 .vdesc{color:var(--txt2);font-size:clamp(.78rem,.95vw,.9rem);line-height:1.7}
+.s2 .right{flex:1;padding:4% 4%;display:flex;flex-direction:column}
+.s2 .plabel{color:var(--txt2);font-size:.72rem;font-weight:700;
+  letter-spacing:4px;margin-bottom:.2rem}
+.s2 .ptitle{color:var(--txt);font-size:clamp(1rem,1.4vw,1.25rem);
+  font-weight:700;margin-bottom:.8rem}
+.s2 .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1}
+.s2 .pcard{border-radius:8px;padding:14px;border:1px solid rgba(0,0,0,.07);
+  border-left:5px solid;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.s2 .pnum{display:inline-flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:50%;color:#fff;
+  font-size:.72rem;font-weight:700;margin-bottom:5px}
+.s2 .pname{font-size:.92rem;font-weight:700;color:var(--txt);margin-bottom:3px}
+.s2 .pdesc{font-size:.78rem;color:var(--txt2);line-height:1.5}
+
+/* ══════════════════════════════════════════════════
+   SLIDE 3 — WBS
+══════════════════════════════════════════════════ */
+.s3 .hdr{background:var(--dkM);padding:0 2.5%;height:58px;display:flex;
+  align-items:center;justify-content:space-between;flex-shrink:0}
+.s3 .htitle{color:var(--lmL);font-size:clamp(1rem,1.5vw,1.3rem);font-weight:700}
+.s3 .url{background:#1E3520;border:1px solid var(--lmL);border-radius:6px;
+  padding:5px 14px;color:var(--lmL);font-family:Consolas,monospace;
+  font-size:clamp(.65rem,.85vw,.82rem)}
+.s3 .tw{flex:1;padding:1% 1.5%;overflow:hidden}
+.s3 table{width:100%;height:100%;border-collapse:collapse;table-layout:fixed}
+.s3 th,.s3 td{border:1px solid var(--bdr);text-align:center;
+  vertical-align:middle;font-size:clamp(.68rem,.85vw,.82rem)}
+.s3 .pc{width:22%;text-align:left;padding-left:10px}
+.s3 th{background:var(--lmBg3);font-weight:700;color:var(--dkM)}
+.s3 th.cur{background:var(--lm);color:#fff}
+.s3 .ws{display:block;font-size:.62rem;font-weight:400;opacity:.85}
+.s3 td{background:#fff}
+.s3 tr:nth-child(odd) td{background:var(--lmBg)}
+.s3 .pa{border-left:4px solid}
+.s3 .bar{border-radius:5px;height:22px;margin:3px auto;width:78%;opacity:.72}
+.s3 .dbadge{display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:50%;background:var(--lm);
+  color:#fff;font-size:.6rem;font-weight:700;margin-left:5px}
+.s3 .leg{padding:5px 1.5%;display:flex;gap:14px;align-items:center;flex-shrink:0}
+.s3 .ll{font-size:.72rem;font-weight:700;color:var(--dkM)}
+.s3 .li{display:flex;align-items:center;gap:5px;font-size:.7rem;color:var(--txt2)}
+.s3 .ld{width:14px;height:9px;border-radius:3px}
+.s3 .ln{margin-left:auto;font-size:.7rem;color:var(--txt3)}
+
+/* ══════════════════════════════════════════════════
+   SLIDE 4 — ARCHITECTURE
+══════════════════════════════════════════════════ */
+.s4{background:#F4FAF5}
+.s4 .hdr{background:var(--dkM);padding:0;height:58px;display:flex;
+  align-items:center;justify-content:space-between;flex-shrink:0}
+.s4 .hbar{width:5px;height:58px;background:var(--lmM);flex-shrink:0}
+.s4 .htitle{color:var(--lmL);font-size:clamp(1rem,1.5vw,1.3rem);
+  font-weight:700;padding-left:14px}
+.s4 .hsub{color:#7AAE80;font-size:clamp(.72rem,.9vw,.88rem);padding-right:2.5%}
+.s4 .ab{flex:1;display:grid;grid-template-columns:57% 4% 39%;padding:1.2% 1.8%;gap:0}
+.s4 .layers{display:flex;flex-direction:column;gap:8px}
+.s4 .layer{border-radius:6px;border:1.5px solid;padding:9px 14px;
+  border-left-width:5px;box-shadow:0 2px 8px rgba(58,104,64,.08);flex:1;
+  display:flex;flex-direction:column;justify-content:center}
+.s4 .ltitle{font-size:clamp(.9rem,1.2vw,1.05rem);font-weight:700;color:var(--txt);margin-bottom:2px}
+.s4 .lsub{font-size:clamp(.68rem,.82vw,.78rem);color:var(--txt2)}
+.s4 .arrows{display:flex;flex-direction:column;align-items:center;
+  justify-content:space-around;color:var(--lmM);font-size:1.2rem;padding-top:24px}
+.s4 .svcs{display:flex;flex-direction:column;gap:10px}
+.s4 .sbox{border-radius:8px;border:1.5px solid;overflow:hidden;
+  box-shadow:0 2px 8px rgba(58,104,64,.08);flex:1}
+.s4 .shdr{padding:7px 14px;font-weight:700;
+  font-size:clamp(.78rem,1vw,.92rem);color:#fff}
+.s4 .sbody{padding:8px 14px}
+.s4 .si{font-size:clamp(.68rem,.82vw,.8rem);color:var(--txt);padding:2px 0}
+.s4 .mbar{background:var(--lmBg3);border-top:1px solid var(--bdr);
+  padding:5px 2%;font-family:Consolas,monospace;
+  font-size:clamp(.6rem,.78vw,.72rem);color:var(--dkM);flex-shrink:0}
+
+/* ══════════════════════════════════════════════════
+   SLIDE 5 — DELIVERABLES
+══════════════════════════════════════════════════ */
+.s5{background:var(--lmBg)}
+.s5 .hdr{background:var(--dkM);height:60px;display:flex;
+  align-items:center;flex-shrink:0}
+.s5 .hbar{width:5px;height:60px;background:var(--lmM);flex-shrink:0}
+.s5 .htitle{color:var(--lmL);font-size:clamp(1rem,1.5vw,1.3rem);
+  font-weight:700;padding-left:14px;flex:1}
+.s5 .hsub{color:#7AAE80;font-size:clamp(.72rem,.9vw,.88rem);padding-right:2%}
+.s5 .cw{display:flex;gap:10px;padding:1.8% 1.8% 1%;flex:1}
+.s5 .card{flex:1;border-radius:8px;border:1.5px solid;border-top-width:4px;
+  padding:11px;background:#fff;display:flex;flex-direction:column;
+  box-shadow:0 2px 8px rgba(58,104,64,.07)}
+.s5 .cid{font-size:.68rem;font-weight:700;padding:2px 8px;
+  border-radius:10px;margin-bottom:7px;display:inline-block;align-self:flex-start}
+.s5 .ctitle{font-size:clamp(.85rem,1.1vw,1rem);font-weight:700;color:var(--txt);margin-bottom:5px}
+.s5 .cdesc{font-size:clamp(.7rem,.85vw,.78rem);color:var(--txt2);line-height:1.55;flex:1}
+.s5 .cdone{font-size:.78rem;font-weight:700;color:var(--lm);margin-top:7px}
+.s5 .hbanner{margin:0 1.8% 1.2%;background:var(--lmBg3);
+  border:1.5px solid var(--lm);border-radius:8px;padding:13px 20px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.s5 .ht{font-size:clamp(.9rem,1.2vw,1.1rem);font-weight:700;color:var(--txt)}
+.s5 .hc{font-family:Consolas,monospace;font-size:clamp(.78rem,1vw,.9rem);
+  font-weight:700;color:var(--dkM)}
+.s5 .footer{background:var(--dkM);padding:7px;text-align:center;
+  font-size:clamp(.62rem,.8vw,.78rem);color:var(--lmL);flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="pres">
+
+<!-- ─── SLIDE 1: COVER ─────────────────────────────── -->
+<div class="slide s1 active">
+  <div class="blob" style="right:-8%;top:-30%;width:55%;background:var(--dkM);opacity:.58"></div>
+  <div class="blob" style="left:-12%;bottom:-20%;width:40%;background:var(--dkS);opacity:.5"></div>
+  <div class="blob" style="right:5%;bottom:5%;width:18%;background:var(--lmM);opacity:.2"></div>
+  <div class="lbar"></div>
+  <div class="body">
+    <div class="pre">AI 기반</div>
+    <div class="title">실시간 감정 일기 앱</div>
+    <div class="tagline">감정을 기록하는 것을 넘어, 이해하는 삶으로</div>
+    <div class="div"></div>
+    <div class="sub">세션 3 — 설계 &amp; 환경 구축 &nbsp;|&nbsp; Week 11</div>
+    <div class="tags">
+      <span class="tag" style="background:rgba(107,174,114,.45)">React Native + Expo</span>
+      <span class="tag" style="background:rgba(109,196,188,.45)">Zustand</span>
+      <span class="tag" style="background:rgba(201,168,90,.45)">Firebase</span>
+      <span class="tag" style="background:rgba(169,157,214,.45)">Claude API</span>
+    </div>
+    <div class="meta">Vibe Coding Project · 2026.05</div>
+  </div>
+</div>
+
+<!-- ─── SLIDE 2: VISION & PROBLEM ─────────────────── -->
+<div class="slide s2">
+  <div class="left">
+    <div class="lb1"></div><div class="lb2"></div>
+    <div class="lc">
+      <div class="vlabel">VISION</div>
+      <div class="quote">"</div>
+      <div class="vtext">
+        감정을 기록하는<br>것을 넘어,<br><br>
+        감정을 <em>이해하는</em> 삶으로
+      </div>
+      <div class="vdesc">AI가 사용자의 글과 목소리를 실시간으로<br>분석해 감정 패턴을 파악하고<br>개인화된 인사이트와 위로를 제공합니다</div>
+    </div>
+  </div>
+  <div class="right">
+    <div class="plabel">PROBLEM</div>
+    <div class="ptitle">왜 이 앱이 필요한가?</div>
+    <div class="pgrid">
+      <div class="pcard" style="background:var(--lmBg2);border-color:var(--lm)">
+        <div class="pnum" style="background:var(--lm)">01</div>
+        <div class="pname">감정 인식 부재</div>
+        <div class="pdesc">현대인 64%는 본인 감정<br>상태를 정확히 모름</div>
+      </div>
+      <div class="pcard" style="background:var(--tealBg);border-color:var(--teal)">
+        <div class="pnum" style="background:var(--teal)">02</div>
+        <div class="pname">기록의 단절</div>
+        <div class="pdesc">기존 앱은 저장뿐<br>패턴 파악 기능 없음</div>
+      </div>
+      <div class="pcard" style="background:var(--goldBg);border-color:var(--gold)">
+        <div class="pnum" style="background:var(--gold)">03</div>
+        <div class="pname">전문가 접근성</div>
+        <div class="pdesc">심리 상담은 비용·시간<br>장벽이 너무 높음</div>
+      </div>
+      <div class="pcard" style="background:var(--peachBg);border-color:var(--peach)">
+        <div class="pnum" style="background:var(--peach)">04</div>
+        <div class="pname">사후 대응 한계</div>
+        <div class="pdesc">감정 위기는 이미 악화<br>된 후에야 인지됨</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SLIDE 3: WBS ───────────────────────────────── -->
+<div class="slide s3 col">
+  <div class="hdr">
+    <span class="htitle">프로젝트 WBS</span>
+    <span class="url">🌐&nbsp; yourteam.github.io/emotion-diary/wbs</span>
+  </div>
+  <div class="tw">
+    <table>
+      <thead>
+        <tr>
+          <th class="pc">단계</th>
+          <th class="cur">W1<span class="ws">기획·환경</span></th>
+          <th>W2<span class="ws">핵심개발</span></th>
+          <th>W3<span class="ws">핵심개발</span></th>
+          <th>W4<span class="ws">AI·기능</span></th>
+          <th>W5<span class="ws">테스트</span></th>
+          <th>W6<span class="ws">출시</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="pc pa" style="border-left-color:var(--lm)">
+            <strong>기획 &amp; 설계</strong><span class="dbadge">✓</span>
+          </td>
+          <td><div class="bar" style="background:var(--lm)"></div></td>
+          <td></td><td></td><td></td><td></td><td></td>
+        </tr>
+        <tr>
+          <td class="pc pa" style="border-left-color:var(--lm)">
+            <strong>개발환경 구축</strong><span class="dbadge">✓</span>
+          </td>
+          <td><div class="bar" style="background:var(--lm)"></div></td>
+          <td></td><td></td><td></td><td></td><td></td>
+        </tr>
+        <tr>
+          <td class="pc pa" style="border-left-color:var(--teal)">핵심 기능 개발</td>
+          <td></td>
+          <td><div class="bar" style="background:var(--teal)"></div></td>
+          <td><div class="bar" style="background:var(--teal)"></div></td>
+          <td></td><td></td><td></td>
+        </tr>
+        <tr>
+          <td class="pc pa" style="border-left-color:var(--lav)">AI 기능 개발</td>
+          <td></td>
+          <td><div class="bar" style="background:var(--lav)"></div></td>
+          <td><div class="bar" style="background:var(--lav)"></div></td>
+          <td><div class="bar" style="background:var(--lav)"></div></td>
+          <td></td><td></td>
+        </tr>
+        <tr>
+          <td class="pc pa" style="border-left-color:var(--gold)">테스트 &amp; QA</td>
+          <td></td><td></td><td></td><td></td>
+          <td><div class="bar" style="background:var(--gold)"></div></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td class="pc pa" style="border-left-color:var(--peach)">출시 &amp; 운영</td>
+          <td></td><td></td><td></td><td></td><td></td>
+          <td><div class="bar" style="background:var(--peach)"></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="leg">
+    <span class="ll">범례:</span>
+    <span class="li"><span class="ld" style="background:var(--lm)"></span>완료</span>
+    <span class="li"><span class="ld" style="background:var(--teal)"></span>진행중</span>
+    <span class="li"><span class="ld" style="background:#C8D8CA"></span>대기</span>
+    <span class="ln">* 상세 WBS · GitHub Pages에서 실시간 확인 가능</span>
+  </div>
+</div>
+
+<!-- ─── SLIDE 4: ARCHITECTURE ──────────────────────── -->
+<div class="slide s4 col">
+  <div class="hdr">
+    <div class="hbar"></div>
+    <span class="htitle">시스템 아키텍처</span>
+    <span class="hsub">Layered Architecture + Firebase + Claude API</span>
+  </div>
+  <div class="ab">
+    <div class="layers">
+      <div class="layer" style="background:#EBF7EC;border-color:var(--lm)">
+        <div class="ltitle">🎨 Presentation</div>
+        <div class="lsub">screens &nbsp;·&nbsp; components &nbsp;·&nbsp; theme</div>
+      </div>
+      <div class="layer" style="background:var(--tealBg);border-color:var(--teal)">
+        <div class="ltitle">⚙️ Application</div>
+        <div class="lsub">Zustand stores &nbsp;·&nbsp; use-cases &nbsp;·&nbsp; hooks</div>
+      </div>
+      <div class="layer" style="background:var(--goldBg);border-color:var(--gold)">
+        <div class="ltitle">🧠 Domain</div>
+        <div class="lsub">entities &nbsp;·&nbsp; services &nbsp;·&nbsp; rules</div>
+      </div>
+      <div class="layer" style="background:var(--bluBg);border-color:var(--blu)">
+        <div class="ltitle">💾 Data</div>
+        <div class="lsub">repositories &nbsp;·&nbsp; Firebase SDK &nbsp;·&nbsp; local cache</div>
+      </div>
+    </div>
+    <div class="arrows">
+      <span>▾</span><span>▾</span><span>▾</span>
+      <span style="color:var(--gold);font-size:1rem">→</span>
+      <span style="color:var(--teal);font-size:1rem">→</span>
+    </div>
+    <div class="svcs">
+      <div class="sbox" style="border-color:var(--gold)">
+        <div class="shdr" style="background:var(--gold)">☁️&nbsp; Firebase</div>
+        <div class="sbody" style="background:var(--goldBg)">
+          <div class="si">🔐&nbsp; Authentication</div>
+          <div class="si">🗄️&nbsp; Firestore</div>
+          <div class="si">⚡&nbsp; Cloud Functions</div>
+          <div class="si">🔔&nbsp; FCM</div>
+        </div>
+      </div>
+      <div class="sbox" style="border-color:var(--teal)">
+        <div class="shdr" style="background:var(--teal)">🤖&nbsp; Claude API</div>
+        <div class="sbody" style="background:var(--tealBg)">
+          <div class="si">감정 분석 &nbsp;·&nbsp; 공감 응답 생성</div>
+          <div class="si" style="font-size:.68rem;color:var(--txt2)">Cloud Functions를 통해 안전하게 호출</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mbar">
+    flowchart TB &nbsp;&nbsp; P[Presentation] → A[Application] → D[Domain] → DA[Data] &nbsp;&nbsp;&nbsp; DA → Firebase &nbsp;&nbsp;&nbsp; CF(Cloud Functions) → Claude
+  </div>
+</div>
+
+<!-- ─── SLIDE 5: DELIVERABLES ──────────────────────── -->
+<div class="slide s5 col">
+  <div class="hdr">
+    <div class="hbar"></div>
+    <span class="htitle">이번 주 완성한 것</span>
+    <span class="hsub">Week 11 · 세션 3 산출물&nbsp; ✓</span>
+  </div>
+  <div class="cw">
+    <div class="card" style="border-color:var(--lm)">
+      <span class="cid" style="background:var(--lmBg2);color:var(--dkM)">ADR-0001</span>
+      <div class="ctitle">플랫폼 선택</div>
+      <div class="cdesc">React Native + Expo<br>↔ Flutter, Android</div>
+      <div class="cdone">✓ 완료</div>
+    </div>
+    <div class="card" style="border-color:var(--teal)">
+      <span class="cid" style="background:var(--tealBg);color:var(--dkM)">ADR-0002</span>
+      <div class="ctitle">상태관리 선택</div>
+      <div class="cdesc">Zustand<br>↔ Redux, MobX</div>
+      <div class="cdone">✓ 완료</div>
+    </div>
+    <div class="card" style="border-color:var(--gold)">
+      <span class="cid" style="background:var(--goldBg);color:var(--dkM)">ADR-0003</span>
+      <div class="ctitle">백엔드 선택</div>
+      <div class="cdesc">Firebase<br>↔ Supabase, Node.js</div>
+      <div class="cdone">✓ 완료</div>
+    </div>
+    <div class="card" style="border-color:var(--blu)">
+      <span class="cid" style="background:var(--bluBg);color:var(--dkM)">docs/</span>
+      <div class="ctitle">architecture.md</div>
+      <div class="cdesc">Mermaid 다이어그램<br>레이어 &amp; 파일 위치</div>
+      <div class="cdone">✓ 완료</div>
+    </div>
+    <div class="card" style="border-color:var(--lav)">
+      <span class="cid" style="background:var(--lavBg);color:var(--dkM)">docs/</span>
+      <div class="ctitle">setup.md</div>
+      <div class="cdesc">Zero → Run 가이드<br>Win · Mac · Linux FAQ 5</div>
+      <div class="cdone">✓ 완료</div>
+    </div>
+  </div>
+  <div class="hbanner">
+    <span class="ht">🚀&nbsp; "Hello World" 빌드 성공 → GitHub push 완료 ✓</span>
+    <span class="hc">npx expo start</span>
+  </div>
+  <div class="footer">⏱ 발표 제한 2분 &nbsp;·&nbsp; 스마트폰 타이머 ON &nbsp;·&nbsp; ADR 하나를 60초 안에: 선택 → 대안 → 이유</div>
+</div>
+
+</div><!-- .pres -->
+
+<!-- ─── CONTROLS ────────────────────────────────────── -->
+<div class="nav">
+  <span class="counter" id="ctr">1 / 5</span>
+  <button class="nav-btn" onclick="go(-1)">◀</button>
+  <button class="nav-btn" onclick="go(1)">▶</button>
+</div>
+<div class="timer" id="tmr" onclick="toggleTimer()" title="클릭: 시작/중지 · R: 리셋">⏱ 2:00</div>
+<div class="keys">← → Space: 이동 &nbsp;|&nbsp; N: 대본 &nbsp;|&nbsp; T: 타이머 &nbsp;|&nbsp; R: 리셋 &nbsp;|&nbsp; F: 전체화면</div>
+<div class="notes" id="notes"><div id="nc"></div></div>
+
+<script>
+const NOTES=[
+  '<strong>[0:00–0:18]</strong> 안녕하세요. AI 기반 실시간 감정 일기 앱을 개발 중인 [이름]입니다. 텍스트·음성으로 감정을 기록하면 AI가 즉시 분석해 공감 메시지와 패턴 인사이트를 제공합니다. 기술 스택은 React Native+Expo, Zustand, Firebase, Claude API입니다.',
+  '<strong>[0:18–0:52]</strong> 비전은 "감정을 이해하는 삶으로"입니다. 이유 4가지 — 01 현대인 64% 감정 모름 / 02 기존 앱 저장만 / 03 상담 접근성 낮음 / 04 위기는 사후 인식. 저희 앱이 이 네 가지를 동시에 해결합니다.',
+  '<strong>[0:52–1:15]</strong> 6주 일정입니다. 이 WBS는 GitHub Pages에 자동 배포되어 실시간 확인 가능. 현재 W1 — 기획·설계와 개발환경 구축 완료 ✓. W2부터 핵심·AI 기능 개발을 병행합니다.',
+  '<strong>[1:15–1:42]</strong> 4개 레이어 — Presentation(화면) / Application(Zustand 상태) / Domain(감정 규칙, 외부 의존성 없음) / Data(Firebase SDK). AI 분석은 Cloud Functions에서만 Claude API 호출 → API 키 보안. docs/architecture.md에 Mermaid 다이어그램으로 문서화.',
+  '<strong>[1:42–2:00]</strong> 산출물 5개. ADR-0001: React Native+Expo — Flutter 대비 JS/TS 경험 활용. ADR-0002 Zustand / ADR-0003 Firebase. architecture.md + setup.md 작성 완료. Hello World 빌드 성공 &amp; GitHub push 완료. 이상입니다!'
+];
+let cur=0,sec=120,iv=null,running=false;
+const slides=document.querySelectorAll('.slide');
+function show(n){
+  slides.forEach(s=>s.classList.remove('active'));
+  slides[n].classList.add('active');
+  document.getElementById('ctr').textContent=(n+1)+' / '+slides.length;
+  document.getElementById('nc').innerHTML=NOTES[n];
+}
+function go(d){
+  const n=cur+d;
+  if(n>=0&&n<slides.length){cur=n;show(cur);}
+}
+function toggleTimer(){
+  if(running){clearInterval(iv);running=false;}
+  else{
+    if(sec<=0)sec=120;
+    running=true;
+    iv=setInterval(()=>{
+      sec--;tick();
+      if(sec<=0){clearInterval(iv);running=false;}
+    },1000);
+  }
+}
+function tick(){
+  const m=Math.floor(sec/60),s=sec%60;
+  const t=document.getElementById('tmr');
+  t.textContent='⏱ '+m+':'+String(s).padStart(2,'0');
+  t.className='timer'+(sec<=30?' danger':sec<=60?' warn':'');
+}
+function resetTimer(){
+  clearInterval(iv);running=false;sec=120;
+  const t=document.getElementById('tmr');
+  t.textContent='⏱ 2:00';t.className='timer';
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(1);}
+  else if(e.key==='ArrowLeft')go(-1);
+  else if(e.key==='n'||e.key==='N')document.getElementById('notes').classList.toggle('on');
+  else if(e.key==='t'||e.key==='T')toggleTimer();
+  else if(e.key==='r'||e.key==='R')resetTimer();
+  else if(e.key==='f'||e.key==='F'){
+    if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }
+});
+document.querySelector('.pres').addEventListener('click',e=>{
+  if(!e.target.closest('.nav')&&!e.target.closest('.timer'))go(1);
+});
+</script>
+</body>
+</html>
