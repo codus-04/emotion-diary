@@ -7,7 +7,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--dk:#2E5233;--dkM:#3A6840;--lm:#6BAE72;--lmM:#8DC494;--lmL:#AACFAF;--lmBg:#F0F8F1;--lmBg2:#DDF0E1;--lmBg3:#C5E5CA;--teal:#6DC4BC;--tealBg:#E0F4F2;--lav:#A99DD6;--lavBg:#EEEBF8;--peach:#E0A090;--peachBg:#FCF0EC;--gold:#C9A85A;--goldBg:#F5EEDB;--blu:#7AAFD6;--bluBg:#E4F0FA;--txt:#1C3A20;--txt2:#4A6B50;--txt3:#6B8F70;--bdr:#BDD4C0}
-body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:var(--lmBg);color:var(--txt)}
+body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:var(--lmBg);color:var(--txt);min-height:100vh}
 .site-header{background:var(--dk)}
 .header-top{display:flex;align-items:stretch;min-height:72px}
 .header-accent{width:6px;background:var(--lmM);flex-shrink:0}
@@ -21,13 +21,12 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:var
 .stat-card{background:#fff;border-radius:8px;padding:16px 18px;border:1.5px solid var(--bdr);border-top:3px solid}
 .stat-num{font-size:2rem;font-weight:700;line-height:1}
 .stat-lbl{font-size:.78rem;color:var(--txt2);margin-top:4px}
-.section{max-width:1100px;margin:24px auto;padding:0 32px 0}
+.section{max-width:1100px;margin:24px auto;padding:0 32px}
 .sec-title{font-size:1rem;font-weight:700;color:var(--dkM);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .sec-title::before{content:'';display:block;width:4px;height:18px;background:var(--lm);border-radius:2px}
 .video-wrap{background:#fff;border-radius:10px;border:1.5px solid var(--bdr);overflow:hidden;box-shadow:0 2px 12px rgba(46,82,51,.07);padding:20px}
-.video-wrap iframe{width:100%;height:480px;border:none;border-radius:8px}
-.video-desc{margin-top:12px;font-size:.85rem;color:var(--txt2);line-height:1.6}
-.video-link{display:inline-block;margin-top:10px;background:var(--lm);color:#fff;padding:8px 18px;border-radius:20px;text-decoration:none;font-size:.85rem;font-weight:700}
+.video-link{display:inline-block;margin-top:12px;background:var(--lm);color:#fff;padding:10px 24px;border-radius:20px;text-decoration:none;font-size:.9rem;font-weight:700}
+.video-desc{margin-top:10px;font-size:.85rem;color:var(--txt2);line-height:1.6}
 .wbs-wrap{background:#fff;border-radius:10px;border:1.5px solid var(--bdr);overflow:hidden;box-shadow:0 2px 12px rgba(46,82,51,.07)}
 .wbs-grid{display:grid;grid-template-columns:220px repeat(6,1fr);border-bottom:1px solid var(--bdr)}
 .wbs-grid:last-child{border-bottom:none}
@@ -93,20 +92,15 @@ footer{background:var(--dkM);color:var(--lmL);text-align:center;padding:14px;fon
   <div class="stat-card" style="border-top-color:var(--lav)"><div class="stat-num" style="color:var(--lav)">✓</div><div class="stat-lbl">Hello World 빌드</div></div>
 </div>
 
-<!-- 데모 영상 -->
 <div class="section" style="margin-top:24px">
   <div class="sec-title">🎬 앱 데모 영상</div>
   <div class="video-wrap">
-    <iframe src="https://drive.google.com/file/d/1KvC7PXDqTriT0yvp0kkLCEFncgwKaM-A/preview" allowfullscreen></iframe>
-    <div class="video-desc">
-      AI 감정 일기 앱 데모 영상입니다.<br>
-      텍스트 일기 작성 → 감정 선택 → AI 감정 분석 → 공감 메시지 → 히스토리 확인 순서로 시연합니다.
-    </div>
-    <a class="video-link" href="https://drive.google.com/file/d/1KvC7PXDqTriT0yvp0kkLCEFncgwKaM-A/view" target="_blank">▶ 영상 전체화면으로 보기</a>
+    <div style="font-size:.9rem;color:var(--txt2);margin-bottom:12px">AI 감정 일기 앱 시연 — 일기 작성 → 감정 분석 → AI 공감 메시지 → 히스토리 확인</div>
+    <a class="video-link" href="https://drive.google.com/file/d/1KvC7PXDqTriT0yvp0kkLCEFncgwKaM-A/view" target="_blank">▶ 데모 영상 보기 (Google Drive)</a>
+    <div class="video-desc">위 버튼을 클릭하면 영상이 열립니다.</div>
   </div>
 </div>
 
-<!-- WBS -->
 <div class="section">
   <div class="sec-title">프로젝트 WBS — 6주 진행 현황</div>
   <div class="wbs-wrap">
@@ -158,7 +152,6 @@ footer{background:var(--dkM);color:var(--lmL);text-align:center;padding:14px;fon
   </div>
 </div>
 
-<!-- ADR -->
 <div class="section">
   <div class="sec-title">아키텍처 결정 기록 (ADR)</div>
   <div class="adr-grid">
@@ -166,8 +159,8 @@ footer{background:var(--dkM);color:var(--lmL);text-align:center;padding:14px;fon
       <div class="adr-head"><div class="adr-id">ADR-0001</div><div class="adr-title">모바일 플랫폼 선택</div></div>
       <div class="adr-body">
         <div class="adr-row"><span class="adr-key">결정</span><span><code>React Native + Expo</code></span></div>
-        <div class="adr-row"><span class="adr-key">대안</span><span>Flutter, Android (Kotlin), iOS (Swift)</span></div>
-        <div class="adr-row"><span class="adr-key">이유</span><span>팀 JS/TS 경험 활용 · Expo SDK 즉시 사용 · 6주 출시 일정</span></div>
+        <div class="adr-row"><span class="adr-key">대안</span><span>Flutter, Android, iOS</span></div>
+        <div class="adr-row"><span class="adr-key">이유</span><span>팀 JS/TS 경험 · Expo SDK · 6주 일정</span></div>
       </div>
       <div class="adr-foot">✓ Accepted · 2026.05.18</div>
     </div>
@@ -175,8 +168,8 @@ footer{background:var(--dkM);color:var(--lmL);text-align:center;padding:14px;fon
       <div class="adr-head"><div class="adr-id">ADR-0002</div><div class="adr-title">상태관리 선택</div></div>
       <div class="adr-body">
         <div class="adr-row"><span class="adr-key">결정</span><span><code>Zustand</code></span></div>
-        <div class="adr-row"><span class="adr-key">대안</span><span>Redux Toolkit, MobX, Jotai</span></div>
-        <div class="adr-row"><span class="adr-key">이유</span><span>경량 · 단순 API · TypeScript 추론 · 비동기 직접 지원</span></div>
+        <div class="adr-row"><span class="adr-key">대안</span><span>Redux Toolkit, MobX</span></div>
+        <div class="adr-row"><span class="adr-key">이유</span><span>경량 · 단순 API · TypeScript 추론</span></div>
       </div>
       <div class="adr-foot" style="color:var(--teal)">✓ Accepted · 2026.05.18</div>
     </div>
@@ -184,23 +177,22 @@ footer{background:var(--dkM);color:var(--lmL);text-align:center;padding:14px;fon
       <div class="adr-head"><div class="adr-id">ADR-0003</div><div class="adr-title">백엔드 선택</div></div>
       <div class="adr-body">
         <div class="adr-row"><span class="adr-key">결정</span><span><code>Firebase</code></span></div>
-        <div class="adr-row"><span class="adr-key">대안</span><span>Supabase, 자체 Node.js 서버</span></div>
-        <div class="adr-row"><span class="adr-key">이유</span><span>AI API 키 Cloud Functions 보관 · Auth+Firestore+FCM 통합</span></div>
+        <div class="adr-row"><span class="adr-key">대안</span><span>Supabase, Node.js 서버</span></div>
+        <div class="adr-row"><span class="adr-key">이유</span><span>AI API 키 보안 · Auth+Firestore+FCM</span></div>
       </div>
       <div class="adr-foot" style="color:var(--gold)">✓ Accepted · 2026.05.18</div>
     </div>
   </div>
 </div>
 
-<!-- 산출물 -->
 <div class="section" style="padding-bottom:32px">
   <div class="sec-title">산출물 체크리스트</div>
   <div class="checklist">
     <div class="check-row"><div class="check-icon" style="background:var(--lm)">✓</div><span class="check-file">docs/architecture.md</span><span class="check-desc">Mermaid 다이어그램 + 레이어별 파일 위치</span><span class="check-status">완료</span></div>
-    <div class="check-row"><div class="check-icon" style="background:var(--lm)">✓</div><span class="check-file">docs/setup.md</span><span class="check-desc">Zero → Run 절차 (Windows / macOS / Linux) + FAQ 5개</span><span class="check-status">완료</span></div>
+    <div class="check-row"><div class="check-icon" style="background:var(--lm)">✓</div><span class="check-file">docs/setup.md</span><span class="check-desc">Zero → Run 절차 (Windows / macOS / Linux)</span><span class="check-status">완료</span></div>
     <div class="check-row"><div class="check-icon" style="background:var(--lm)">✓</div><span class="check-file">ADR-0001 ~ 0003</span><span class="check-desc">플랫폼 · 상태관리 · 백엔드 결정 기록</span><span class="check-status">완료</span></div>
     <div class="check-row"><div class="check-icon" style="background:var(--lm)">✓</div><span class="check-file">50% 기능 구현</span><span class="check-desc">일기 작성 · 감정 분석 · AI 메시지 · 히스토리</span><span class="check-status">완료</span></div>
-    <div class="check-row"><div class="check-icon" style="background:var(--lm)">✓</div><span class="check-file">Hello World 빌드</span><span class="check-desc">npx expo start → Expo Go 실행 성공 + GitHub push 완료</span><span class="check-status">완료</span></div>
+    <div class="check-row"><div class="check-icon" style="background:var(--lm)">✓</div><span class="check-file">Hello World 빌드</span><span class="check-desc">npx expo start → Expo Go 실행 성공</span><span class="check-status">완료</span></div>
   </div>
 </div>
 
