@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 감정 일기 앱 — 프로젝트 WBS</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--dk:#2E5233;--dkM:#3A6840;--lm:#6BAE72;--lmM:#8DC494;--lmL:#AACFAF;--lmBg:#F0F8F1;--lmBg2:#DDF0E1;--lmBg3:#C5E5CA;--teal:#6DC4BC;--tealBg:#E0F4F2;--lav:#A99DD6;--lavBg:#EEEBF8;--peach:#E0A090;--peachBg:#FCF0EC;--gold:#C9A85A;--goldBg:#F5EEDB;--blu:#7AAFD6;--bluBg:#E4F0FA;--txt:#1C3A20;--txt2:#4A6B50;--txt3:#6B8F70;--bdr:#BDD4C0}
+body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:var(--lmBg);color:var(--txt)}
+.site-header{background:var(--dk)}
+.header-top{display:flex;align-items:stretch;min-height:72px}
+.header-accent{width:6px;background:var(--lmM);flex-shrink:0}
+.header-body{flex:1;padding:18px 32px}
+.header-title{font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:3px}
+.header-sub{font-size:.88rem;color:var(--lmL)}
+.header-meta{display:flex;align-items:center;gap:16px;padding:10px 38px;background:var(--dkM);font-size:.78rem;color:#7AAE80;flex-wrap:wrap}
+.header-meta a{color:var(--lmL);text-decoration:none}
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);padding:3px 10px;border-radius:12px;color:var(--lmL)}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding:24px 32px 0;max-width:1100px;margin:0 auto}
+.stat-card{background:#fff;border-radius:8px;padding:16px 18px;border:1.5px solid var(--bdr);border-top:3px solid}
+.stat-num{font-size:2rem;font-weight:700;line-height:1}
+.stat-lbl{font-size:.78rem;color:var(--txt2);margin-top:4px}
+.section{max-width:1100px;margin:24px auto;padding:0 32px 0}
+.sec-title{font-size:1rem;font-weight:700;color:var(--dkM);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sec-title::before{content:'';display:block;width:4px;height:18px;background:var(--lm);border-radius:2px}
+.video-wrap{background:#fff;border-radius:10px;border:1.5px solid var(--bdr);overflow:hidden;box-shadow:0 2px 12px rgba(46,82,51,.07);padding:20px}
+.video-wrap iframe{width:100%;height:480px;border:none;border-radius:8px}
+.video-desc{margin-top:12px;font-size:.85rem;color:var(--txt2);line-height:1.6}
+.video-link{display:inline-block;margin-top:10px;background:var(--lm);color:#fff;padding:8px 18px;border-radius:20px;text-decoration:none;font-size:.85rem;font-weight:700}
+.wbs-wrap{background:#fff;border-radius:10px;border:1.5px solid var(--bdr);overflow:hidden;box-shadow:0 2px 12px rgba(46,82,51,.07)}
+.wbs-grid{display:grid;grid-template-columns:220px repeat(6,1fr);border-bottom:1px solid var(--bdr)}
+.wbs-grid:last-child{border-bottom:none}
+.wbs-hdr{background:var(--lmBg3)}
+.wbs-hdr .cell{font-size:.78rem;font-weight:700;color:var(--dkM);padding:10px 8px;text-align:center;border-right:1px solid var(--bdr)}
+.wbs-hdr .cell:last-child{border-right:none}
+.wbs-hdr .cell.cur{background:var(--lm);color:#fff}
+.wk-sub{display:block;font-size:.62rem;font-weight:400;opacity:.8;margin-top:1px}
+.phase-label{text-align:left!important;padding-left:14px!important}
+.wbs-row{border-bottom:1px solid var(--bdr)}
+.wbs-row:last-child{border-bottom:none}
+.wbs-row:nth-child(even){background:#FAFCFA}
+.cell{padding:8px;border-right:1px solid var(--bdr);display:flex;align-items:center;justify-content:center}
+.cell:last-child{border-right:none}
+.phase-cell{justify-content:flex-start;padding-left:0;gap:0;font-size:.85rem}
+.phase-stripe{width:5px;height:100%;flex-shrink:0;min-height:40px}
+.phase-name{padding:0 10px;font-weight:500;color:var(--txt)}
+.phase-name.done{font-weight:700}
+.done-dot{width:18px;height:18px;border-radius:50%;background:var(--lm);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:.6rem;font-weight:700;margin-left:4px}
+.bar-wrap{width:100%;display:flex;align-items:center;justify-content:center}
+.bar{width:78%;height:20px;border-radius:5px;opacity:.75}
+.adr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.adr-card{background:#fff;border-radius:8px;border:1.5px solid var(--bdr);border-top:3px solid;overflow:hidden;box-shadow:0 2px 8px rgba(46,82,51,.06)}
+.adr-head{padding:12px 16px;border-bottom:1px solid var(--bdr)}
+.adr-id{font-size:.7rem;font-weight:700;letter-spacing:1px;color:var(--txt2);margin-bottom:3px}
+.adr-title{font-size:.95rem;font-weight:700;color:var(--txt)}
+.adr-body{padding:12px 16px;font-size:.82rem;color:var(--txt2);line-height:1.7}
+.adr-row{display:flex;gap:8px;margin-bottom:4px}
+.adr-key{font-weight:700;color:var(--txt);min-width:44px}
+.adr-val code{background:var(--lmBg2);padding:1px 6px;border-radius:4px;font-family:Consolas,monospace;font-size:.78rem;color:var(--dkM)}
+.adr-foot{padding:8px 16px;background:var(--lmBg);font-size:.75rem;color:var(--lm);font-weight:700;border-top:1px solid var(--bdr)}
+.checklist{display:flex;flex-direction:column;gap:8px}
+.check-row{display:flex;align-items:center;gap:12px;background:#fff;border-radius:8px;padding:12px 16px;border:1.5px solid var(--bdr);box-shadow:0 1px 4px rgba(46,82,51,.05)}
+.check-icon{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0}
+.check-file{font-family:Consolas,monospace;font-size:.82rem;font-weight:700;color:var(--dkM);min-width:180px}
+.check-desc{font-size:.8rem;color:var(--txt2);flex:1}
+.check-status{font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:10px;background:var(--lmBg2);color:var(--dkM)}
+footer{background:var(--dkM);color:var(--lmL);text-align:center;padding:14px;font-size:.78rem;margin-top:32px}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-top">
+    <div class="header-accent"></div>
+    <div class="header-body">
+      <div class="header-title">🌿 AI 기반 실시간 감정 일기 앱</div>
+      <div class="header-sub">Vibe Coding Project · Week 11 · 세션 3 — 설계 & 환경 구축</div>
+    </div>
+  </div>
+  <div class="header-meta">
+    <span class="badge">📅 2026.06.01 업데이트</span>
+    <span class="badge">👤 ichaeyeon</span>
+    <a href="https://github.com/codus-04/emotion-diary" class="badge">🔗 GitHub 저장소</a>
+    <span class="badge">⚡ React Native + Expo · Zustand · Firebase · Claude API</span>
+  </div>
+</header>
+
+<div class="summary">
+  <div class="stat-card" style="border-top-color:var(--lm)"><div class="stat-num" style="color:var(--lm)">2 / 6</div><div class="stat-lbl">완료된 단계</div></div>
+  <div class="stat-card" style="border-top-color:var(--teal)"><div class="stat-num" style="color:var(--teal)">3</div><div class="stat-lbl">작성된 ADR</div></div>
+  <div class="stat-card" style="border-top-color:var(--gold)"><div class="stat-num" style="color:var(--gold)">50%</div><div class="stat-lbl">기능 구현률</div></div>
+  <div class="stat-card" style="border-top-color:var(--blu)"><div class="stat-num" style="color:var(--blu)">W1</div><div class="stat-lbl">현재 진행 주차</div></div>
+  <div class="stat-card" style="border-top-color:var(--lav)"><div class="stat-num" style="color:var(--lav)">✓</div><div class="stat-lbl">Hello World 빌드</div></div>
+</div>
+
+<!-- 데모 영상 -->
+<div class="section" style="margin-top:24px">
+  <div class="sec-title">🎬 앱 데모 영상</div>
+  <div class="video-wrap">
+    <iframe src="https://drive.google.com/file/d/1KvC7PXDqTriT0yvp0kkLCEFncgwKaM-A/preview" allowfullscreen></iframe>
+    <div class="video-desc">
+      AI 감정 일기 앱 데모 영상입니다.<br>
+      텍스트 일기 작성 → 감정 선택 → AI 감정 분석 → 공감 메시지 → 히스토리 확인 순서로 시연합니다.
+    </div>
+    <a class="video-link" href="https://drive.google.com/file/d/1KvC7PXDqTriT0yvp0kkLCEFncgwKaM-A/view" target="_blank">▶ 영상 전체화면으로 보기</a>
+  </div>
+</div>
+
+<!-- WBS -->
+<div class="section">
+  <div class="sec-title">프로젝트 WBS — 6주 진행 현황</div>
+  <div class="wbs-wrap">
+    <div class="wbs-grid wbs-hdr">
+      <div class="cell phase-label">단계</div>
+      <div class="cell cur">W1<span class="wk-sub">기획·환경</span></div>
+      <div class="cell">W2<span class="wk-sub">핵심개발</span></div>
+      <div class="cell">W3<span class="wk-sub">핵심개발</span></div>
+      <div class="cell">W4<span class="wk-sub">AI·기능</span></div>
+      <div class="cell">W5<span class="wk-sub">테스트</span></div>
+      <div class="cell">W6<span class="wk-sub">출시</span></div>
+    </div>
+    <div class="wbs-grid wbs-row">
+      <div class="cell phase-cell"><div class="phase-stripe" style="background:var(--lm)"></div><span class="phase-name done">기획 &amp; 설계<span class="done-dot">✓</span></span></div>
+      <div class="cell"><div class="bar-wrap"><div class="bar" style="background:var(--lm)"></div></div></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+    <div class="wbs-grid wbs-row">
+      <div class="cell phase-cell"><div class="phase-stripe" style="background:var(--lm)"></div><span class="phase-name done">개발환경 구축<span class="done-dot">✓</span></span></div>
+      <div class="cell"><div class="bar-wrap"><div class="bar" style="background:var(--lm)"></div></div></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+    <div class="wbs-grid wbs-row">
+      <div class="cell phase-cell"><div class="phase-stripe" style="background:var(--teal)"></div><span class="phase-name">핵심 기능 개발</span></div>
+      <div class="cell"></div>
+      <div class="cell"><div class="bar-wrap"><div class="bar" style="background:var(--teal)"></div></div></div>
+      <div class="cell"><div class="bar-wrap"><div class="bar" style="background:var(--teal)"></div></div></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+    <div class="wbs-grid wbs-row">
+      <div class="cell phase-cell"><div class="phase-stripe" style="background:var(--lav)"></div><span class="phase-name">AI 기능 개발 <small style="color:var(--txt3);font-size:.72rem">(병행)</small></span></div>
+      <div class="cell"></div>
+      <div class="cell"><div class="bar-wrap"><div class="bar" style="background:var(--lav)"></div></div></div>
+      <div class="cell"><div class="bar-wrap"><div class="bar" style="background:var(--lav)"></div></div></div>
+      <div class="cell"><div class="bar-wrap"><div class="bar" style="background:var(--lav)"></div></div></div>
+      <div class="cell"></div><div class="cell"></div>
+    </div>
+    <div class="wbs-grid wbs-row">
+      <div class="cell phase-cell"><div class="phase-stripe" style="background:var(--gold)"></div><span class="phase-name">테스트 &amp; QA</span></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"><div class="bar-wrap"><div class="bar" style="background:var(--gold)"></div></div></div>
+      <div class="cell"></div>
+    </div>
+    <div class="wbs-grid wbs-row">
+      <div class="cell phase-cell"><div class="phase-stripe" style="background:var(--peach)"></div><span class="phase-name">출시 &amp; 운영</span></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"><div class="bar-wrap"><div class="bar" style="background:var(--peach)"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADR -->
+<div class="section">
+  <div class="sec-title">아키텍처 결정 기록 (ADR)</div>
+  <div class="adr-grid">
+    <div class="adr-card" style="border-top-color:var(--lm)">
+      <div class="adr-head"><div class="adr-id">ADR-0001</div><div class="adr-title">모바일 플랫폼 선택</div></div>
+      <div class="adr-body">
+        <div class="adr-row"><span class="adr-key">결정</span><span><code>React Native + Expo</code></span></div>
+        <div class="adr-row"><span class="adr-key">대안</span><span>Flutter, Android (Kotlin), iOS (Swift)</span></div>
+        <div class="adr-row"><span class="adr-key">이유</span><span>팀 JS/TS 경험 활용 · Expo SDK 즉시 사용 · 6주 출시 일정</span></div>
+      </div>
+      <div class="adr-foot">✓ Accepted · 2026.05.18</div>
+    </div>
+    <div class="adr-card" style="border-top-color:var(--teal)">
+      <div class="adr-head"><div class="adr-id">ADR-0002</div><div class="adr-title">상태관리 선택</div></div>
+      <div class="adr-body">
+        <div class="adr-row"><span class="adr-key">결정</span><span><code>Zustand</code></span></div>
+        <div class="adr-row"><span class="adr-key">대안</span><span>Redux Toolkit, MobX, Jotai</span></div>
+        <div class="adr-row"><span class="adr-key">이유</span><span>경량 · 단순 API · TypeScript 추론 · 비동기 직접 지원</span></div>
+      </div>
+      <div class="adr-foot" style="color:var(--teal)">✓ Accepted · 2026.05.18</div>
+    </div>
+    <div class="adr-card" style="border-top-color:var(--gold)">
+      <div class="adr-head"><div class="adr-id">ADR-0003</div><div class="adr-title">백엔드 선택</div></div>
+      <div class="adr-body">
+        <div class="adr-row"><span class="adr-key">결정</span><span><code>Firebase</code></span></div>
+        <div class="adr-row"><span class="adr-key">대안</span><span>Supabase, 자체 Node.js 서버</span></div>
+        <div class="adr-row"><span class="adr-key">이유</span><span>AI API 키 Cloud Functions 보관 · Auth+Firestore+FCM 통합</span></div>
+      </div>
+      <div class="adr-foot" style="color:var(--gold)">✓ Accepted · 2026.05.18</div>
+    </div>
+  </div>
+</div>
+
+<!-- 산출물 -->
+<div class="section" style="padding-bottom:32px">
+  <div class="sec-title">산출물 체크리스트</div>
+  <div class="checklist">
+    <div class="check-row"><div class="check-icon" style="background:var(--lm)">✓</div><span class="check-file">docs/architecture.md</span><span class="check-desc">Mermaid 다이어그램 + 레이어별 파일 위치</span><span class="check-status">완료</span></div>
+    <div class="check-row"><div class="check-icon" style="background:var(--lm)">✓</div><span class="check-file">docs/setup.md</span><span class="check-desc">Zero → Run 절차 (Windows / macOS / Linux) + FAQ 5개</span><span class="check-status">완료</span></div>
+    <div class="check-row"><div class="check-icon" style="background:var(--lm)">✓</div><span class="check-file">ADR-0001 ~ 0003</span><span class="check-desc">플랫폼 · 상태관리 · 백엔드 결정 기록</span><span class="check-status">완료</span></div>
+    <div class="check-row"><div class="check-icon" style="background:var(--lm)">✓</div><span class="check-file">50% 기능 구현</span><span class="check-desc">일기 작성 · 감정 분석 · AI 메시지 · 히스토리</span><span class="check-status">완료</span></div>
+    <div class="check-row"><div class="check-icon" style="background:var(--lm)">✓</div><span class="check-file">Hello World 빌드</span><span class="check-desc">npx expo start → Expo Go 실행 성공 + GitHub push 완료</span><span class="check-status">완료</span></div>
+  </div>
+</div>
+
+<footer>AI 감정 일기 앱 · Vibe Coding Project · Week 11 &nbsp;|&nbsp; <a href="https://github.com/codus-04/emotion-diary">GitHub</a> &nbsp;|&nbsp; 2026.06.01</footer>
+</body>
+</html>
