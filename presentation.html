@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌿 emotion-diary — 최종 발표</title>
+<style>
+  :root{
+    --green-darkest:#1f4521;
+    --green-dark:#2c5530;
+    --green-mid:#5b9a5f;
+    --green-soft:#6aae6f;
+    --green-light-bg:#eaf3ec;
+    --green-tint:#dde9de;
+    --green-tint2:#e6f0e7;
+    --white:#ffffff;
+    --text:#2c3e2e;
+    --muted:#6b7c6d;
+    --muted-light:#a9bdab;
+    --accent-orange:#e08a3c;
+    --accent-purple:#9b4fa8;
+    --accent-blue:#4a7a9e;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;background:#0d1f0e;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Segoe UI",sans-serif;color:var(--text);overflow:hidden;}
+  .serif{font-family:Georgia,"Times New Roman",serif;}
+
+  #deck{position:relative;width:100vw;height:100vh;}
+  .slide{
+    position:absolute;inset:0;
+    display:none;
+    flex-direction:column;
+    width:100%;height:100%;
+    opacity:0;transition:opacity .35s ease;
+  }
+  .slide.active{display:flex;opacity:1;}
+
+  /* aspect-ratio frame: 16:9 centered */
+  .stage{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  }
+  .frame{
+    position:relative;
+    width:min(100vw, 177.78vh);
+    height:min(56.25vw, 100vh);
+    background:var(--green-light-bg);
+    overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+
+  /* ---- shared header band ---- */
+  .band{
+    background:var(--green-dark);
+    color:#fff;
+    padding:3.2% 4.2% 2.6%;
+  }
+  .band h1{font-size:2.5vw;font-weight:800;letter-spacing:-.5px;}
+  .band .sub{font-size:1.15vw;color:#c5d8c7;margin-top:.6vw;font-weight:500;}
+
+  .body{flex:1;padding:3% 4.2%;display:flex;flex-direction:column;}
+
+  /* generic cards */
+  .card{background:#fff;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.06);padding:2.2vw;}
+  .card-tint{background:var(--green-tint2);border-radius:14px;padding:2.2vw;}
+
+  .emoji{font-style:normal;}
+
+  /* TITLE SLIDE */
+  .title-slide{background:var(--green-dark);color:#fff;align-items:center;justify-content:center;text-align:center;}
+  .title-logo{display:flex;align-items:center;justify-content:center;gap:1.2vw;}
+  .title-logo .leaf{font-size:4vw;}
+  .title-logo h1{font-size:5.2vw;font-weight:700;color:#f4f7f0;}
+  .title-tag{font-size:2vw;color:#cdded0;margin-top:1.8vw;font-weight:500;}
+  .title-rule{width:34%;height:2px;background:#5b8d5f;margin:2.6vw auto 2vw;}
+  .title-meta{font-size:1.5vw;color:#dfeae0;letter-spacing:.5px;}
+  .title-course{font-size:1.2vw;color:#9fb8a2;margin-top:1vw;}
+  .chips{display:flex;gap:1vw;margin-top:3vw;flex-wrap:wrap;justify-content:center;}
+  .chip{border:1px solid #5b8d5f;border-radius:8px;padding:.8vw 1.6vw;font-size:1.05vw;color:#dfeae0;}
+
+  /* SLIDE 2 */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:2.4vw;flex:1;}
+  .block-title{display:flex;align-items:center;gap:.8vw;font-size:1.7vw;font-weight:800;margin-bottom:1.6vw;}
+  .vision-quote{font-style:italic;font-size:1.3vw;line-height:1.7;color:var(--text);}
+  .vision-rule{height:1px;background:var(--green-tint);margin:1.8vw 0;}
+  .vision-note{font-size:1.1vw;color:var(--muted);line-height:1.6;}
+  .prob{display:flex;gap:1.2vw;margin-bottom:1.7vw;align-items:flex-start;}
+  .prob .num{flex:none;width:2.4vw;height:2.4vw;border-radius:50%;background:var(--green-mid);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1vw;}
+  .prob .ph{font-size:1.3vw;font-weight:700;display:flex;align-items:center;gap:.5vw;}
+  .prob .pd{font-size:1vw;color:var(--muted);margin-top:.4vw;}
+
+  /* SLIDE 3 WBS */
+  .wbs-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:2.2vw;flex:1;}
+  .wbs-list{display:flex;flex-direction:column;gap:.85vw;}
+  .wbs-row{display:flex;align-items:center;gap:1.2vw;background:#fff;border-radius:10px;padding:1vw 1.4vw;}
+  .wbs-row.alt{background:var(--green-tint2);}
+  .wbs-week{flex:none;font-size:1vw;font-weight:700;color:var(--green-mid);width:2.4vw;}
+  .wbs-row h4{font-size:1.15vw;font-weight:700;}
+  .wbs-row p{font-size:.9vw;color:var(--muted);margin-top:.2vw;}
+  .stack-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1.6vw;}
+  .stack-card{background:#fff;border-radius:12px;padding:1.2vw;display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:flex-start;}
+  .stack-badge{border-radius:8px;color:#fff;font-weight:700;font-size:1.05vw;padding:.7vw 0;width:100%;text-align:center;}
+  .stack-card p{font-size:1vw;color:var(--text);margin-top:1.1vw;line-height:1.5;}
+
+  /* SLIDE 4 architecture */
+  .arch-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:2vw;flex:1;align-items:stretch;}
+  .arch-layers{display:flex;flex-direction:column;gap:1vw;}
+  .arch-layer{border-radius:10px;padding:1.3vw 1.6vw;color:#fff;flex:1;display:flex;flex-direction:column;justify-content:center;}
+  .arch-layer h3{font-size:1.4vw;font-weight:700;}
+  .arch-layer p{font-size:1vw;opacity:.85;margin-top:.4vw;}
+  .arch-desc{display:flex;flex-direction:column;gap:1vw;}
+  .arch-descbox{background:#fff;border-radius:10px;padding:1.3vw 1.5vw;flex:1;display:flex;align-items:center;font-size:1.1vw;color:var(--text);}
+
+  /* SLIDE 5 troubleshooting */
+  .trouble{display:flex;flex-direction:column;gap:1.3vw;flex:1;}
+  .trouble .card{padding:1.5vw 2vw;}
+  .trouble h3{font-size:1.45vw;font-weight:800;display:flex;align-items:center;gap:.6vw;margin-bottom:.9vw;}
+  .trouble .line{font-size:1.05vw;margin:.35vw 0;}
+  .trouble .line b{color:var(--accent-blue);}
+  .trouble .lesson{font-style:italic;color:var(--muted);font-size:1vw;}
+
+  /* SLIDE 6 build/deploy */
+  .setup-list{display:flex;flex-direction:column;gap:1.15vw;}
+  .setup-list .step{font-size:1.15vw;}
+  .setup-list .step.hl{color:#c0392b;font-weight:700;}
+  .warnbox{margin-top:1.4vw;background:var(--green-tint2);border-radius:10px;padding:1vw 1.4vw;text-align:center;color:#c0392b;font-weight:700;font-size:1.05vw;}
+  .deploy-step{background:var(--green-tint2);border-radius:10px;padding:1.1vw 1.4vw;margin-bottom:1vw;}
+  .deploy-step .dh{font-size:1.2vw;font-weight:800;color:var(--green-mid);}
+  .deploy-step .dh small{color:var(--muted);font-weight:500;font-size:.95vw;margin-left:.8vw;}
+  .deploy-step code{display:block;font-family:"SF Mono",Consolas,monospace;font-size:1vw;margin-top:.6vw;color:var(--text);}
+  .deploy-note{font-size:.95vw;color:var(--muted);line-height:1.6;margin-top:.4vw;}
+
+  /* SLIDE 7 ADR */
+  .adr{background:#fff;border-radius:12px;padding:1.3vw 1.6vw;margin-bottom:1.2vw;}
+  .adr .head{display:flex;align-items:center;gap:1vw;margin-bottom:.6vw;}
+  .adr .badge{background:var(--green-mid);color:#fff;border-radius:7px;padding:.4vw 1vw;font-size:.95vw;font-weight:700;flex:none;}
+  .adr .ht{font-size:1.3vw;font-weight:700;}
+  .adr .dec{font-size:1.05vw;font-weight:700;}
+  .adr .why{font-size:.95vw;color:var(--muted);margin-top:.3vw;}
+  .qbox{background:#fff;border-radius:12px;padding:1.3vw 1.6vw;margin-bottom:1.2vw;}
+  .qbox h3{font-size:1.4vw;font-weight:800;display:flex;align-items:center;gap:.5vw;margin-bottom:.8vw;}
+  .qbox li{list-style:none;font-size:1vw;margin:.5vw 0;color:var(--text);}
+
+  /* SLIDE 8 future */
+  .future-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1.8vw;flex:1;}
+  .future-card h3{font-size:1.5vw;font-weight:800;display:flex;align-items:center;gap:.7vw;margin-bottom:1.1vw;}
+  .future-card p{font-size:1.1vw;color:var(--muted);}
+  .perf-bar{margin-top:1.6vw;background:var(--green-dark);color:#fff;border-radius:10px;padding:1vw 1.5vw;font-size:1vw;}
+
+  /* SLIDE 9 demo flow (dark) */
+  .demo-slide{background:var(--green-dark);color:#fff;align-items:center;justify-content:center;}
+  .demo-head{display:flex;align-items:center;justify-content:center;gap:1.2vw;margin-bottom:4vw;}
+  .demo-head .ph{font-size:3vw;}
+  .demo-head h1{font-size:3.6vw;font-weight:800;color:#dfeada;}
+  .demo-flow{display:flex;align-items:flex-start;justify-content:center;gap:1vw;}
+  .demo-step{display:flex;flex-direction:column;align-items:center;width:13vw;text-align:center;}
+  .demo-circle{width:5vw;height:5vw;border-radius:50%;background:var(--green-mid);display:flex;align-items:center;justify-content:center;font-size:1.6vw;font-weight:700;}
+  .demo-step h4{font-size:1.5vw;font-weight:700;margin-top:1.4vw;}
+  .demo-step p{font-size:1vw;color:#bcd0bd;margin-top:.8vw;line-height:1.5;}
+  .demo-conn{height:2px;width:3vw;background:#5b8d5f;margin-top:2.5vw;}
+
+  /* SLIDE 10 app mockup */
+  .mock-slide{background:var(--green-light-bg);align-items:center;justify-content:center;}
+  .phone{width:24vw;height:48vw;max-height:92%;background:#fff;border-radius:2vw;box-shadow:0 12px 40px rgba(0,0,0,.18);overflow:hidden;display:flex;flex-direction:column;border:.4vw solid #1c1c1c;}
+  .ph-top{background:var(--green-dark);color:#fff;padding:1.4vw;font-size:1.1vw;font-weight:700;display:flex;align-items:center;gap:.5vw;}
+  .ph-body{flex:1;padding:1.6vw;background:#f3f8f3;overflow:hidden;}
+  .ph-date{font-size:.85vw;color:var(--muted);margin-bottom:1vw;}
+  .ph-q{font-size:1vw;font-weight:700;margin-bottom:.8vw;}
+  .ph-input{background:#fff;border:1px solid #d4e3d5;border-radius:.8vw;height:9vw;padding:1vw;font-size:.85vw;color:#aaa;margin-bottom:1.4vw;}
+  .ph-emos{display:flex;flex-wrap:wrap;gap:.7vw;margin-bottom:1.6vw;}
+  .ph-emo{background:#fff;border:1px solid #d4e3d5;border-radius:1.4vw;padding:.6vw 1vw;font-size:.85vw;}
+  .ph-btn{background:var(--green-soft);color:#fff;border-radius:.8vw;text-align:center;padding:1.1vw;font-size:.95vw;font-weight:700;}
+  .ph-nav{display:flex;border-top:1px solid #e0e0e0;background:#fff;}
+  .ph-nav div{flex:1;text-align:center;padding:1vw;font-size:.75vw;color:var(--muted);}
+  .mock-caption{position:absolute;bottom:4%;left:0;right:0;text-align:center;font-size:1.1vw;color:var(--muted);}
+
+  /* SLIDE 11 closing (dark) */
+  .close-slide{background:var(--green-dark);color:#fff;align-items:center;justify-content:center;text-align:center;}
+  .close-logo{display:flex;align-items:center;justify-content:center;gap:1vw;margin-bottom:2.6vw;}
+  .close-logo .leaf{font-size:3vw;}
+  .close-logo h1{font-size:4vw;font-weight:700;color:#dfeada;}
+  .close-list{display:flex;flex-direction:column;gap:1.2vw;align-items:flex-start;}
+  .close-item{font-size:1.5vw;display:flex;align-items:center;gap:1vw;}
+  .close-rule{width:50%;height:1px;background:#5b8d5f;margin:2.4vw auto 2vw;}
+  .close-thanks{font-size:2.6vw;font-weight:800;}
+
+  /* navigation UI */
+  #nav{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;z-index:50;background:rgba(31,69,33,.82);backdrop-filter:blur(6px);padding:8px 16px;border-radius:30px;}
+  #nav button{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:2px 8px;border-radius:6px;line-height:1;}
+  #nav button:hover{background:rgba(255,255,255,.15);}
+  #counter{color:#fff;font-size:13px;min-width:48px;text-align:center;letter-spacing:1px;}
+  .dots{display:flex;gap:6px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer;}
+  .dot.on{background:#fff;}
+  @media (max-width:700px){#nav{bottom:8px;}}
+</style>
+</head>
+<body>
+<div id="deck">
+
+  <!-- SLIDE 1 -->
+  <section class="slide active"><div class="stage"><div class="frame title-slide">
+    <div class="title-logo"><span class="leaf">🌿</span><h1 class="serif">emotion-diary</h1></div>
+    <div class="title-tag">AI가 내 감정을 읽어주는 일기 앱</div>
+    <div class="title-rule"></div>
+    <div class="title-meta">이채연　·　2023136041　·　신구대학교</div>
+    <div class="title-course">Vibe Coding — 앱프로그래밍응용 최종 발표</div>
+    <div class="chips">
+      <span class="chip">React Native</span>
+      <span class="chip">Expo SDK 54</span>
+      <span class="chip">Zustand</span>
+      <span class="chip">Firebase</span>
+      <span class="chip">Claude API</span>
+    </div>
+  </div></div></section>
+
+  <!-- SLIDE 2 -->
+  <section class="slide"><div class="stage"><div class="frame">
+    <div class="band"><h1>비전 &amp; 문제 정의</h1><div class="sub">왜 이 앱이 필요한가?</div></div>
+    <div class="body"><div class="two-col">
+      <div class="card">
+        <div class="block-title"><span class="emoji">💡</span>비전</div>
+        <div class="vision-quote">"감정을 글로 표현하는 것이 어려운 현대인에게, AI가 먼저 내 감정을 읽고 위로와 인사이트를 건네준다."</div>
+        <div class="vision-rule"></div>
+        <div class="vision-note">→ 일기를 쓰면 AI가 자동으로 감정을 분석하고 위로 메시지를 생성하는 앱</div>
+      </div>
+      <div class="card">
+        <div class="block-title"><span class="emoji">⚠️</span>문제 정의</div>
+        <div class="prob"><div class="num">1</div><div><div class="ph">😶 감정 표현 어려움</div><div class="pd">감정을 글로 쓰는 것 자체가 막막하다</div></div></div>
+        <div class="prob"><div class="num">2</div><div><div class="ph">📝 일기 지속성 부재</div><div class="pd">쓰고 나서도 '이게 맞나?' 공허함이 남는다</div></div></div>
+        <div class="prob"><div class="num">3</div><div><div class="ph">📊 자기 이해 부족</div><div class="pd">내 감정 패턴을 시각적으로 보기 어렵다</div></div></div>
+      </div>
+    </div></div>
+  </div></div></section>
+
+  <!-- SLIDE 3 -->
+  <section class="slide"><div class="stage"><div class="frame">
+    <div class="band"><h1>프로젝트 계획 — WBS &amp; 기술 스택</h1><div class="sub">6주 일정 + 기술 선택 근거</div></div>
+    <div class="body"><div class="wbs-grid">
+      <div class="wbs-list">
+        <div class="wbs-row"><div class="wbs-week">1주</div><div><h4>기획 &amp; 요구사항</h4><p>비전·MoSCoW·사용자 시나리오</p></div></div>
+        <div class="wbs-row"><div class="wbs-week">2주</div><div><h4>설계 &amp; ADR</h4><p>아키텍처·ADR-0001~0003</p></div></div>
+        <div class="wbs-row"><div class="wbs-week">3주</div><div><h4>환경 구축</h4><p>Expo 세팅·Firebase 연동</p></div></div>
+        <div class="wbs-row alt"><div class="wbs-week">4주</div><div><h4>핵심 구현</h4><p>일기 작성·Claude API 연동</p></div></div>
+        <div class="wbs-row alt"><div class="wbs-week">5주</div><div><h4>테스트 &amp; 디버깅</h4><p>의존성 충돌 해결·기능 완성</p></div></div>
+        <div class="wbs-row alt"><div class="wbs-week">6주</div><div><h4>문서화 &amp; 배포</h4><p>README·docs·최종 발표</p></div></div>
+      </div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="stack-badge" style="background:var(--green-soft)">React Native + Expo SDK 54</div><p>크로스플랫폼<br>즉시 테스트 (Expo Go)</p></div>
+        <div class="stack-card"><div class="stack-badge" style="background:var(--green-dark)">Zustand</div><p>경량 상태관리<br>boilerplate 없음</p></div>
+        <div class="stack-card"><div class="stack-badge" style="background:var(--accent-orange)">Firebase</div><p>Auth + Firestore<br>설정 간편</p></div>
+        <div class="stack-card"><div class="stack-badge" style="background:var(--accent-purple)">Claude API</div><p>한국어 감정분석<br>자연어 이해 최고품질</p></div>
+      </div>
+    </div></div>
+  </div></div></section>
+
+  <!-- SLIDE 4 -->
+  <section class="slide"><div class="stage"><div class="frame">
+    <div class="band"><h1>아키텍처 — 4레이어 클린 아키텍처</h1><div class="sub">단방향 의존성 · 관심사 분리</div></div>
+    <div class="body"><div class="arch-grid">
+      <div class="arch-layers">
+        <div class="arch-layer" style="background:var(--green-soft)"><h3>Presentation Layer</h3><p>App.tsx · HomeScreen · HistoryScreen</p></div>
+        <div class="arch-layer" style="background:var(--green-mid)"><h3>Application Layer</h3><p>Zustand Store (diaryStore.ts)</p></div>
+        <div class="arch-layer" style="background:var(--green-dark)"><h3>Domain Layer</h3><p>DiaryEntry · EmotionResult 타입</p></div>
+        <div class="arch-layer" style="background:var(--green-darkest)"><h3>Data Layer</h3><p>claudeService.ts · firebaseService.ts</p></div>
+      </div>
+      <div class="arch-desc">
+        <div class="arch-descbox">React 컴포넌트 / UI 렌더링만 담당</div>
+        <div class="arch-descbox">전역 상태 관리 · 서비스 조율</div>
+        <div class="arch-descbox">핵심 비즈니스 모델 정의</div>
+        <div class="arch-descbox">Claude API + Firebase 외부 통신</div>
+      </div>
+    </div></div>
+  </div></div></section>
+
+  <!-- SLIDE 5 -->
+  <section class="slide"><div class="stage"><div class="frame">
+    <div class="band"><h1>구현 과정 &amp; 시행착오</h1><div class="sub">개발자 관점의 문제 해결 기록</div></div>
+    <div class="body"><div class="trouble">
+      <div class="card">
+        <h3>🔧 Expo SDK 버전 충돌</h3>
+        <div class="line"><b>문제:</b> SDK 56 설치 시 react-native-reanimated peer dependency 에러</div>
+        <div class="line"><b>해결:</b> SDK 54로 다운그레이드 + npm install --legacy-peer-deps</div>
+        <div class="lesson">교훈: SDK 버전 호환성을 먼저 확인 후 의존성 설치</div>
+      </div>
+      <div class="card">
+        <h3>🧭 expo-router → useState 전환</h3>
+        <div class="line"><b>문제:</b> expo-router가 SDK 54에서 navigation 충돌 발생</div>
+        <div class="line"><b>해결:</b> App.tsx에서 useState로 screen 전환하는 단순 구조로 교체</div>
+        <div class="lesson">교훈: 의존성 최소화 → 안정성 향상</div>
+      </div>
+      <div class="card">
+        <h3>📡 Expo Go 네트워크 연결</h3>
+        <div class="line"><b>문제:</b> QR 스캔 후 연결 안 됨 (방화벽 차단)</div>
+        <div class="line"><b>해결:</b> Mac 방화벽 비활성화 + 동일 Wi-Fi 확인 / --tunnel 모드</div>
+        <div class="lesson">교훈: 모바일 개발 환경 설정의 중요성</div>
+      </div>
+    </div></div>
+  </div></div></section>
+
+  <!-- SLIDE 6 -->
+  <section class="slide"><div class="stage"><div class="frame">
+    <div class="band"><h1>개발 환경 &amp; 빌드 / 배포</h1><div class="sub">GitHub 설치 가이드 포함</div></div>
+    <div class="body"><div class="two-col">
+      <div class="card">
+        <div class="block-title"><span class="emoji">🛠️</span>개발 환경 설정</div>
+        <div class="setup-list">
+          <div class="step">① git clone + cd emotion-diary/emotion-diary</div>
+          <div class="step hl">② npm install --legacy-peer-deps</div>
+          <div class="step">③ cp .env.example .env → API 키 입력</div>
+          <div class="step">④ Firebase 프로젝트 설정</div>
+          <div class="step">⑤ npx expo start → QR 스캔</div>
+        </div>
+        <div class="warnbox">⚠ --legacy-peer-deps 필수 (SDK 54 호환성)</div>
+      </div>
+      <div class="card">
+        <div class="block-title"><span class="emoji">🚀</span>빌드 &amp; 배포 단계</div>
+        <div class="deploy-step"><div class="dh">DEBUG<small>개발 중 실시간</small></div><code>npx expo start</code></div>
+        <div class="deploy-step"><div class="dh">PREVIEW<small>APK 사이드로드</small></div><code>npx eas build --profile preview</code></div>
+        <div class="deploy-step"><div class="dh">PRODUCTION<small>실배포</small></div><code>npx eas build --profile production</code></div>
+        <div class="deploy-note">빌드: 소스코드 → 실행 가능한 바이너리(.apk/.ipa)<br>배포: 사용자 기기에 전달하는 과정</div>
+      </div>
+    </div></div>
+  </div></div></section>
+
+  <!-- SLIDE 7 -->
+  <section class="slide"><div class="stage"><div class="frame">
+    <div class="band"><h1>ADR &amp; 코드 품질 / 테스트</h1><div class="sub">의사결정 기록 + 품질 관리</div></div>
+    <div class="body"><div class="two-col">
+      <div>
+        <div class="adr"><div class="head"><span class="badge">ADR-0001</span><span class="ht">React Native + Expo 선택</span></div><div class="dec">결정: React Native + Expo SDK 54</div><div class="why">이유: 웹 지식 재사용, Expo Go 즉시 테스트, 커뮤니티 풍부</div></div>
+        <div class="adr"><div class="head"><span class="badge">ADR-0002</span><span class="ht">Zustand 상태관리 선택</span></div><div class="dec">결정: Zustand (vs Redux, Context API)</div><div class="why">이유: 보일러플레이트 없음, 학습 곡선 낮음, TypeScript 지원</div></div>
+        <div class="adr"><div class="head"><span class="badge">ADR-0003</span><span class="ht">Firebase 백엔드 선택</span></div><div class="dec">결정: Firebase Auth + Firestore</div><div class="why">이유: Auth+DB 통합 제공, 무료 티어, 설정 간편</div></div>
+      </div>
+      <div>
+        <div class="qbox">
+          <h3>✅ 코드 품질 관리</h3>
+          <ul>
+            <li>• TypeScript 타입 엄격 적용</li>
+            <li>• 레이어별 책임 분리 (클린 아키텍처)</li>
+            <li>• 환경변수 분리 (.env 관리)</li>
+            <li>• API 키 하드코딩 없음</li>
+            <li>• git history 비밀 노출 없음</li>
+          </ul>
+        </div>
+        <div class="qbox">
+          <h3>🧪 테스트</h3>
+          <ul>
+            <li>• 단위: 7개 핵심 시나리오 수동 검증</li>
+            <li>• 통합: Claude API 응답 → 저장 → 표시</li>
+            <li>• 엣지케이스: 빈 입력·네트워크 오류</li>
+          </ul>
+        </div>
+      </div>
+    </div></div>
+  </div></div></section>
+
+  <!-- SLIDE 8 -->
+  <section class="slide"><div class="stage"><div class="frame">
+    <div class="band"><h1>활용 방안 &amp; 향후 발전 방향</h1><div class="sub">기술 습득 의지 + 성능 최적화</div></div>
+    <div class="body"><div class="future-grid">
+      <div class="card future-card"><h3>🧠 개인 감정 관리</h3><p>매일 쌓이는 일기로 나만의 감정 패턴 파악</p></div>
+      <div class="card future-card"><h3>📈 감정 통계 시각화</h3><p>주간/월간 감정 변화 차트 (향후 추가 예정)</p></div>
+      <div class="card-tint future-card"><h3>🤝 상담 보조 도구</h3><p>상담사와 공유할 수 있는 감정 기록 레포트</p></div>
+      <div class="card-tint future-card"><h3>🔔 감정 알림</h3><p>부정적 감정이 연속될 때 알림 (향후)</p></div>
+    </div>
+    <div class="perf-bar">⚡ 성능 최적화: Zustand selector로 불필요한 리렌더 방지 · API 응답 로딩 상태 관리 · Firebase 쿼리 인덱스 최적화</div>
+    </div>
+  </div></div></section>
+
+  <!-- SLIDE 9 -->
+  <section class="slide"><div class="stage"><div class="frame demo-slide">
+    <div class="demo-head"><span class="ph">📱</span><h1>라이브 데모</h1></div>
+    <div class="demo-flow">
+      <div class="demo-step"><div class="demo-circle">01</div><h4>앱 실행</h4><p>Expo Go QR 스캔</p></div>
+      <div class="demo-conn"></div>
+      <div class="demo-step"><div class="demo-circle">02</div><h4>일기 작성</h4><p>감정 텍스트 입력</p></div>
+      <div class="demo-conn"></div>
+      <div class="demo-step"><div class="demo-circle">03</div><h4>AI 분석</h4><p>Claude가 감정 레이블 + 위로 메시지 생성</p></div>
+      <div class="demo-conn"></div>
+      <div class="demo-step"><div class="demo-circle">04</div><h4>히스토리</h4><p>저장된 일기 목록 확인</p></div>
+    </div>
+  </div></div></section>
+
+  <!-- SLIDE 10 -->
+  <section class="slide"><div class="stage"><div class="frame mock-slide">
+    <div class="phone">
+      <div class="ph-top">🌿 AI 감정 일기</div>
+      <div class="ph-body">
+        <div class="ph-date">2026년 6월 21일</div>
+        <div class="ph-q">오늘 하루 어떠셨나요?</div>
+        <div class="ph-input">오늘의 감정을 자유롭게 적어보세요...</div>
+        <div class="ph-q">지금 가장 큰 감정은?</div>
+        <div class="ph-emos">
+          <span class="ph-emo">😊 기쁨</span><span class="ph-emo">😢 슬픔</span>
+          <span class="ph-emo">😟 혼남</span><span class="ph-emo">😰 불안</span>
+          <span class="ph-emo">😌 평온</span>
+        </div>
+        <div class="ph-btn">감정 분석하기 →</div>
+      </div>
+      <div class="ph-nav"><div>🏠 홈</div><div>🗂 히스토리</div></div>
+    </div>
+    <div class="mock-caption">실제 앱 화면 — 일기 작성 &amp; 감정 선택 UI</div>
+  </div></div></section>
+
+  <!-- SLIDE 11 -->
+  <section class="slide"><div class="stage"><div class="frame close-slide">
+    <div class="close-logo"><span class="leaf">🌿</span><h1 class="serif">emotion-diary</h1></div>
+    <div class="close-list">
+      <div class="close-item">✅　4레이어 클린 아키텍처 적용</div>
+      <div class="close-item">✅　Claude API 감정 분석 기능 구현</div>
+      <div class="close-item">✅　Firebase Auth + Firestore 연동</div>
+      <div class="close-item">✅　ADR-0001~0003 기술 의사결정 기록</div>
+      <div class="close-item">✅　setup / deploy / testing 문서 완비</div>
+      <div class="close-item">✅　AGENTS.md + README 완성</div>
+    </div>
+    <div class="close-rule"></div>
+    <div class="close-thanks">감사합니다.</div>
+  </div></div></section>
+
+</div>
+
+<div id="nav">
+  <button id="prev" aria-label="이전">‹</button>
+  <div class="dots" id="dots"></div>
+  <span id="counter"></span>
+  <button id="next" aria-label="다음">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  const dotsBox=document.getElementById('dots');
+  const counter=document.getElementById('counter');
+  let i=0;
+  slides.forEach((_,n)=>{const d=document.createElement('div');d.className='dot'+(n===0?' on':'');d.onclick=()=>go(n);dotsBox.appendChild(d);});
+  const dots=[...document.querySelectorAll('.dot')];
+  function go(n){
+    if(n<0)n=0;if(n>=slides.length)n=slides.length-1;
+    slides[i].classList.remove('active');dots[i].classList.remove('on');
+    i=n;
+    slides[i].classList.add('active');dots[i].classList.add('on');
+    counter.textContent=(i+1)+' / '+slides.length;
+  }
+  document.getElementById('next').onclick=()=>go(i+1);
+  document.getElementById('prev').onclick=()=>go(i-1);
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' ')go(i+1);
+    if(e.key==='ArrowLeft'||e.key==='PageUp')go(i-1);
+    if(e.key==='Home')go(0);
+    if(e.key==='End')go(slides.length-1);
+  });
+  // swipe for mobile
+  let sx=0;
+  document.addEventListener('touchstart',e=>sx=e.touches[0].clientX);
+  document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50)go(i+(dx<0?1:-1));});
+  go(0);
+</script>
+</body>
+</html>
